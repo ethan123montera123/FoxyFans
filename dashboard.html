@@ -7,17 +7,16 @@
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FullCalendar CSS and JS for Calendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import necessary Firebase functions
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
             authDomain: "foxyfans-e9761.firebaseapp.com",
@@ -27,33 +26,17 @@
             appId: "1:509215295074:web:2bb6485985db4b99e2333b"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const database = getDatabase(app);
 
-        // Check if the user is logged in on page load
+        // Check if the user is logged in
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                // If the user is not authenticated, redirect to login page
-                window.location.href = "login.html";
-            } else {
-                // User is authenticated, proceed to dashboard
-                console.log("User logged in:", user.email);
+                window.location.href = "login.html"; // Redirect to login page
             }
         });
 
-        // Add active class dynamically based on the current page
-        const currentPage = window.location.pathname;
-        if (currentPage.includes("dashboard.html")) {
-            document.getElementById("homeLink").classList.add("bg-pink-700");
-        } else if (currentPage.includes("applicants.html")) {
-            document.getElementById("applicantsLink").classList.add("bg-pink-700");
-        } else if (currentPage.includes("status.html")) {
-            document.getElementById("statusLink").classList.add("bg-pink-700");
-        }
-
-        // Logout function
         window.logoutUser = async function() {
             try {
                 await signOut(auth);
@@ -64,76 +47,78 @@
             }
         }
 
-        // Function to fetch applicants and update the chart
-        window.fetchApplicantsData = function() {
+        // Fetch applicants and show available interviews
+        window.fetchApplicants = function() {
             const applicationsRef = ref(database, 'applications');
-
-            // Variables to hold the counts of each status
-            let processingCount = 0;
-            let interviewCount = 0;
-            let acceptedCount = 0;
-
-            // Fetch applications data from Firebase
             onValue(applicationsRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
+                    const applicantSelect = document.getElementById('applicantSelect');
+                    applicantSelect.innerHTML = '<option value="">Select Applicant</option>'; // Clear previous options
+
+                    // Populate the dropdown with applicants' names
                     Object.keys(data).forEach((key) => {
                         const applicant = data[key];
-
-                        // Increment the count based on the applicant's status
-                        if (applicant.status === 'Processing') {
-                            processingCount++;
-                        } else if (applicant.status === 'For Interview') {
-                            interviewCount++;
-                        } else if (applicant.status === 'Accepted') {
-                            acceptedCount++;
-                        }
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = applicant.name; // Display only the applicant's name
+                        applicantSelect.appendChild(option);
                     });
-
-                    // Update the chart after fetching the data
-                    updateChart(processingCount, interviewCount, acceptedCount);
-                } else {
-                    // If no data is available, display a message or default chart values
-                    updateChart(0, 0, 0); // Display an empty chart if no data is available
                 }
             });
         };
 
-        // Function to update the chart
-        window.updateChart = function(processing, interview, accepted) {
-            const ctx = document.getElementById('applicantChart').getContext('2d');
-            const chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Processing', 'For Interview', 'Accepted'],
-                    datasets: [{
-                        label: 'Number of Applicants',
-                        data: [processing, interview, accepted],
-                        backgroundColor: ['#ff80ab', '#f48fb1', '#f06292'], // Pink shades
-                        borderColor: ['#ff80ab', '#f48fb1', '#f06292'],
-                        borderWidth: 1
-                    }]
+        window.onload = function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'en',
+                eventClick: function(info) {
+                    alert('Applicant: ' + info.event.title + '\nInterview Date: ' + info.event.start.toLocaleString());
                 },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                dateClick: function(info) {
+                    const selectedDate = info.dateStr;
+                    const applicantId = document.getElementById('applicantSelect').value;
+
+                    if (applicantId) {
+                        const applicantName = document.getElementById('applicantSelect').selectedOptions[0].text;
+
+                        const applicantData = {
+                            name: applicantName,
+                            interviewDate: selectedDate
+                        };
+
+                        // Save the applicant's interview schedule to Firebase
+                        const newInterviewRef = ref(database, 'interviews/' + selectedDate + '-' + applicantId);
+                        set(newInterviewRef, applicantData)
+                            .then(() => {
+                                alert("Interview scheduled successfully!");
+                                calendar.addEvent({
+                                    title: applicantName,  // Only the applicant's name will appear
+                                    start: selectedDate,
+                                    backgroundColor: "#FF80AB",  // Custom color
+                                    borderColor: "#FF80AB"
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error scheduling interview: ", error);
+                            });
+                    } else {
+                        alert("Please select an applicant.");
                     }
                 }
             });
-        };
 
-        // Call the function to fetch applicants data and render the chart
-        window.onload = function() {
-            fetchApplicantsData();
+            // Initialize the calendar
+            calendar.render();
+
+            // Fetch applicants and add to dropdown
+            fetchApplicants();
         };
     </script>
 </head>
 <body class="bg-white">
 
-    <!-- Sidebar and Main Content Wrapper -->
     <div class="flex h-screen">
 
         <!-- Sidebar -->
@@ -142,18 +127,9 @@
                 <h2 class="text-2xl font-semibold mb-6">FoxyFans Dashboard</h2>
                 <nav>
                     <ul>
-                        <!-- Active Link for Home -->
-                        <li>
-                            <a href="dashboard.html" id="homeLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2" aria-current="page">Home</a>
-                        </li>
-                        <!-- Active Link for Applicants -->
-                        <li>
-                            <a href="applicants.html" id="applicantsLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Applicants</a>
-                        </li>
-                        <!-- Active Link for Status -->
-                        <li>
-                            <a href="status.html" id="statusLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Status</a>
-                        </li>
+                        <li><a href="dashboard.html" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Home</a></li>
+                        <li><a href="applicants.html" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Applicants</a></li>
+                        <li><a href="status.html" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Status</a></li>
                     </ul>
                 </nav>
             </div>
@@ -169,46 +145,22 @@
         <!-- Main Content -->
         <div class="flex-1 p-8 overflow-auto">
 
-            <!-- Dashboard Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                <!-- Applicants Overview Card -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Applicants Overview</h3>
-                    <p class="text-gray-600">Number of applicants in each stage.</p>
-                    <div class="mt-6">
-                        <canvas id="applicantChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-
-                <!-- Processing Applicants Card -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Processing Applicants</h3>
-                    <p class="text-gray-600">View the applicants who are currently in the processing stage.</p>
-                    <div class="text-center mt-6">
-                        <button class="bg-pink-600 text-white py-2 px-4 rounded-full"><a href="Processing.html">View Details</a></button>
-                    </div>
-                </div>
-
-                <!-- Interviews Card -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">For Interview</h3>
-                    <p class="text-gray-600">View the applicants scheduled for interviews.</p>
-                    <div class="text-center mt-6">
-                        <button class="bg-pink-600 text-white py-2 px-4 rounded-full">View Details</button>
-                    </div>
-                </div>
-
-                <!-- Accepted Applicants Card -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Accepted Applicants</h3>
-                    <p class="text-gray-600">View the applicants who have been accepted.</p>
-                    <div class="text-center mt-6">
-                        <button class="bg-pink-600 text-white py-2 px-4 rounded-full">View Details</button>
-                    </div>
-                </div>
-
+            <!-- Interview Scheduler -->
+            <div class="mb-8">
+                <label for="applicantSelect" class="block text-gray-700">Select Applicant</label>
+                <select id="applicantSelect" class="mt-2 block w-full bg-white border border-gray-300 rounded-lg p-2">
+                    <!-- Applicants will be dynamically populated here -->
+                </select>
             </div>
+
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold">Schedule an Interview</h3>
+                <p class="text-gray-600">Click on a date on the calendar to schedule an interview with the selected applicant.</p>
+            </div>
+
+            <!-- Calendar -->
+            <div id="calendar"></div>
+
         </div>
     </div>
 
