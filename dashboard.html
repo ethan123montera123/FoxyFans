@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | FoxyFans</title>
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import necessary Firebase functions
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
+            authDomain: "foxyfans-e9761.firebaseapp.com",
+            projectId: "foxyfans-e9761",
+            storageBucket: "foxyfans-e9761.firebasestorage.app",
+            messagingSenderId: "509215295074",
+            appId: "1:509215295074:web:2bb6485985db4b99e2333b"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Check if the user is logged in on page load
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // If the user is not authenticated, redirect to login page
+                window.location.href = "login.html";
+            } else {
+                // User is authenticated, proceed to dashboard
+                console.log("User logged in:", user.email);
+            }
+        });
+
+        // Add active class dynamically based on the current page
+        const currentPage = window.location.pathname;
+        if (currentPage.includes("dashboard.html")) {
+            document.getElementById("homeLink").classList.add("bg-blue-700");
+        } else if (currentPage.includes("applicants.html")) {
+            document.getElementById("applicantsLink").classList.add("bg-blue-700");
+        } else if (currentPage.includes("status.html")) {
+            document.getElementById("statusLink").classList.add("bg-blue-700");
+        }
+
+        // Logout function
+        window.logoutUser = async function() {
+            try {
+                await signOut(auth);
+                alert("You have been logged out.");
+                window.location.href = "login.html"; // Redirect to login page after logout
+            } catch (error) {
+                console.error("Error signing out: ", error);
+            }
+        }
+
+        // Function to fetch applicants and update the chart
+        window.fetchApplicantsData = function() {
+            const applicationsRef = ref(database, 'applications');
+
+            // Variables to hold the counts of each status
+            let processingCount = 0;
+            let interviewCount = 0;
+            let acceptedCount = 0;
+
+            // Fetch applications data from Firebase
+            onValue(applicationsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    Object.keys(data).forEach((key) => {
+                        const applicant = data[key];
+
+                        // Increment the count based on the applicant's status
+                        if (applicant.status === 'Processing') {
+                            processingCount++;
+                        } else if (applicant.status === 'For Interview') {
+                            interviewCount++;
+                        } else if (applicant.status === 'Accepted') {
+                            acceptedCount++;
+                        }
+                    });
+
+                    // Update the chart after fetching the data
+                    updateChart(processingCount, interviewCount, acceptedCount);
+                } else {
+                    // If no data is available, display a message or default chart values
+                    updateChart(0, 0, 0); // Display an empty chart if no data is available
+                }
+            });
+        };
+
+        // Function to update the chart
+        window.updateChart = function(processing, interview, accepted) {
+            const ctx = document.getElementById('applicantChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Processing', 'For Interview', 'Accepted'],
+                    datasets: [{
+                        label: 'Number of Applicants',
+                        data: [processing, interview, accepted],
+                        backgroundColor: ['#ffcc00', '#4e73df', '#28a745'],
+                        borderColor: ['#ffcc00', '#4e73df', '#28a745'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        };
+
+        // Call the function to fetch applicants data and render the chart
+        window.onload = function() {
+            fetchApplicantsData();
+        };
+    </script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Sidebar and Main Content Wrapper -->
+    <div class="flex h-screen">
+
+        <!-- Sidebar -->
+        <div class="bg-blue-600 w-64 p-4 text-white flex flex-col justify-between">
+            <div>
+                <h2 class="text-2xl font-semibold mb-6">FoxyFans Dashboard</h2>
+                <nav>
+                    <ul>
+                        <!-- Active Link for Home -->
+                        <li>
+                            <a href="dashboard.html" id="homeLink" class="block py-2 px-4 rounded-lg hover:bg-blue-700 mb-2" aria-current="page">Home</a>
+                        </li>
+                        <!-- Active Link for Applicants -->
+                        <li>
+                            <a href="applicants.html" id="applicantsLink" class="block py-2 px-4 rounded-lg hover:bg-blue-700 mb-2">Applicants</a>
+                        </li>
+                        <!-- Active Link for Status -->
+                        <li>
+                            <a href="status.html" id="statusLink" class="block py-2 px-4 rounded-lg hover:bg-blue-700 mb-2">Status</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Logout Button -->
+            <div class="mt-auto">
+                <button onclick="logoutUser()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mt-4">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-8 overflow-auto">
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Applicants Overview Card -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Applicants Overview</h3>
+                    <p class="text-gray-600">Number of applicants in each stage.</p>
+                    <div class="mt-6">
+                        <canvas id="applicantChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Processing Applicants Card -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Processing Applicants</h3>
+                    <p class="text-gray-600">View the applicants who are currently in the processing stage.</p>
+                    <div class="text-center mt-6">
+                        <button class="bg-blue-600 text-white py-2 px-4 rounded-full"><a href="Processing.html">View Details</a></button>
+                    </div>
+                </div>
+
+                <!-- Interviews Card -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">For Interview</h3>
+                    <p class="text-gray-600">View the applicants scheduled for interviews.</p>
+                    <div class="text-center mt-6">
+                        <button class="bg-blue-600 text-white py-2 px-4 rounded-full">View Details</button>
+                    </div>
+                </div>
+
+                <!-- Accepted Applicants Card -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Accepted Applicants</h3>
+                    <p class="text-gray-600">View the applicants who have been accepted.</p>
+                    <div class="text-center mt-6">
+                        <button class="bg-green-600 text-white py-2 px-4 rounded-full">View Details</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

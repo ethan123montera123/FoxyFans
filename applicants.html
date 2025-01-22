@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applicants</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        // Import Firebase dependencies
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";  // Import auth and onAuthStateChanged
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
+            authDomain: "foxyfans-e9761.firebaseapp.com",
+            databaseURL: "https://foxyfans-e9761-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "foxyfans-e9761",
+            storageBucket: "foxyfans-e9761.firebasestorage.app",
+            messagingSenderId: "509215295074",
+            appId: "1:509215295074:web:2bb6485985db4b99e2333b"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app); // Initialize Firebase Authentication
+
+        let applicants = [];
+
+        // Authentication check to ensure the user is logged in
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // If no user is logged in, redirect to login page
+                window.location.href = "login.html";
+            }
+        });
+
+        // Fetch applicants from Realtime Database
+        document.addEventListener('DOMContentLoaded', () => {
+            const applicantsRef = ref(database, 'applications');
+            const applicantsTableBody = document.getElementById('applicantsTableBody');
+            const searchInput = document.getElementById('searchInput');
+
+            onValue(applicantsRef, (snapshot) => {
+                applicants = [];
+                applicantsTableBody.innerHTML = ''; // Clear the table
+                snapshot.forEach((childSnapshot) => {
+                    const applicant = childSnapshot.val();
+                    applicants.push(applicant);
+
+                    const row = document.createElement('tr');
+                    row.className = "border-b";
+                    row.innerHTML = `
+                        <td class="py-2 px-4 text-center">${applicants.length}</td>
+                        <td class="py-2 px-4 text-center">${applicant.name}</td>
+                        <td class="py-2 px-4 text-center">${applicant.location}</td>
+                        <td class="py-2 px-4 text-center">${applicant.age}</td>
+                        <td class="py-2 px-4 text-center">${applicant.workExperience}</td>
+                        <td class="py-2 px-4 text-center">${applicant.lastJobPerformance}</td>
+                        <td class="py-2 px-4 text-center">${applicant.workIssues}</td>
+                        <td class="py-2 px-4 text-center">${applicant.typingTest}</td>
+                        <td class="py-2 px-4 text-center">${applicant.proofOfLogouts || 'N/A'}</td>
+                        <td class="py-2 px-4 text-center">${applicant.telegramUsername}</td>
+                    `;
+                    applicantsTableBody.appendChild(row);
+                });
+
+                // Apply search filter
+                searchInput.addEventListener('input', () => {
+                    const query = searchInput.value.toLowerCase();
+                    const filteredApplicants = applicants.filter(applicant => 
+                        applicant.name.toLowerCase().includes(query)
+                    );
+                    displayApplicants(filteredApplicants);
+                });
+            }, (error) => {
+                console.error('Error fetching applicants:', error);
+                const errorRow = document.createElement('tr');
+                errorRow.innerHTML = '<td colspan="10" class="text-red-500 py-4 text-center">Failed to load applicants. Please try again later.</td>';
+                applicantsTableBody.appendChild(errorRow);
+            });
+        });
+
+        // Function to display applicants in the table
+        function displayApplicants(applicants) {
+            const applicantsTableBody = document.getElementById('applicantsTableBody');
+            applicantsTableBody.innerHTML = ''; // Clear the table
+            applicants.forEach((applicant, index) => {
+                const row = document.createElement('tr');
+                row.className = "border-b";
+                row.innerHTML = `
+                    <td class="py-2 px-4 text-center">${index + 1}</td>
+                    <td class="py-2 px-4 text-center">${applicant.name}</td>
+                    <td class="py-2 px-4 text-center">${applicant.location}</td>
+                    <td class="py-2 px-4 text-center">${applicant.age}</td>
+                    <td class="py-2 px-4 text-center">${applicant.workExperience}</td>
+                    <td class="py-2 px-4 text-center">${applicant.lastJobPerformance}</td>
+                    <td class="py-2 px-4 text-center">${applicant.workIssues}</td>
+                    <td class="py-2 px-4 text-center">${applicant.typingTest}</td>
+                    <td class="py-2 px-4 text-center">${applicant.proofOfLogouts || 'N/A'}</td>
+                    <td class="py-2 px-4 text-center">${applicant.telegramUsername}</td>
+                `;
+                applicantsTableBody.appendChild(row);
+            });
+        }
+
+        // Sorting functionality
+        function sortTable(columnIndex, isNumeric = false) {
+            applicants.sort((a, b) => {
+                let valA = a;
+                let valB = b;
+                switch (columnIndex) {
+                    case 1:
+                        valA = a.name.toLowerCase();
+                        valB = b.name.toLowerCase();
+                        break;
+                    case 2:
+                        valA = a.location.toLowerCase();
+                        valB = b.location.toLowerCase();
+                        break;
+                    case 3:
+                        valA = a.age;
+                        valB = b.age;
+                        break;
+                    case 4:
+                        valA = a.workExperience;
+                        valB = b.workExperience;
+                        break;
+                    case 5:
+                        valA = a.lastJobPerformance;
+                        valB = b.lastJobPerformance;
+                        break;
+                    case 6:
+                        valA = a.workIssues;
+                        valB = b.workIssues;
+                        break;
+                    case 7:
+                        valA = a.typingTest;
+                        valB = b.typingTest;
+                        break;
+                    case 8:
+                        valA = a.proofOfLogouts || '';
+                        valB = b.proofOfLogouts || '';
+                        break;
+                    case 9:
+                        valA = a.telegramUsername.toLowerCase();
+                        valB = b.telegramUsername.toLowerCase();
+                        break;
+                }
+                if (isNumeric) {
+                    return valA - valB;
+                } else {
+                    return valA.localeCompare(valB);
+                }
+            });
+            displayApplicants(applicants);
+        }
+
+        // Add active class dynamically based on the current page
+        const currentPage = window.location.pathname;
+        if (currentPage.includes("dashboard.html")) {
+            document.getElementById("homeLink").classList.add("bg-blue-700");
+        } else if (currentPage.includes("applicants.html")) {
+            document.getElementById("applicantsLink").classList.add("bg-blue-700");
+        } else if (currentPage.includes("status.html")) {
+            document.getElementById("statusLink").classList.add("bg-blue-700");
+        }
+
+        // Logout function
+        window.logoutUser = async function() {
+            try {
+                await signOut(auth);
+                alert("You have been logged out.");
+                window.location.href = "login.html"; // Redirect to login page after logout
+            } catch (error) {
+                console.error("Error signing out: ", error);
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
+    <!-- Sidebar -->
+    <div class="bg-blue-600 w-full md:w-64 p-4 text-white flex flex-col justify-between">
+        <div>
+            <h2 class="text-2xl font-semibold mb-6">FoxyFans Dashboard</h2>
+            <nav>
+                <ul>
+                    <li>
+                        <a href="dashboard.html" id="homeLink" class="block py-2 px-4 rounded-lg hover:bg-blue-700 mb-2">Home</a>
+                    </li>
+                    <li>
+                        <a href="applicants.html" id="applicantsLink" class="block py-2 px-4 rounded-lg hover:bg-blue-700 mb-2" aria-current="page">Applicants</a>
+                    </li>
+                    <li>
+                        <a href="status.html" id="statusLink" class="block py-2 px-4 rounded-lg hover:bg-blue-700 mb-2">Status</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="mt-auto">
+            <button onclick="logoutUser()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mt-4">
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-8 overflow-y-auto">
+        <h1 class="text-2xl font-bold mb-6">Applicants</h1>
+        
+        <!-- Search Bar -->
+        <input type="text" id="searchInput" class="border border-gray-300 rounded p-2 mb-4 w-full md:w-1/2" placeholder="Search by name...">
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full border-collapse bg-white shadow-md rounded">
+                <thead class="bg-blue-500 text-white">
+                    <tr>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(0)">ID</th>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(1)">Name</th>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(2)">Location</th>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(3, true)">Age</th>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(4)">Work Experience</th>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(5)">Last Job's Performance</th>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(6)">Work Issues</th>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(7)">Typing Test</th>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(8)">Proof of Logouts</th>
+                        <th class="py-2 px-4 text-center cursor-pointer" onclick="sortTable(9)">Telegram Username</th>
+                    </tr>
+                </thead>
+                <tbody id="applicantsTableBody">
+                    <tr>
+                        <td colspan="10" class="py-4 text-gray-500 text-center">Loading applicants...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

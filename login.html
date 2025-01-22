@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | FoxyFans</title>
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
+            authDomain: "foxyfans-e9761.firebaseapp.com",
+            projectId: "foxyfans-e9761",
+            storageBucket: "foxyfans-e9761.firebasestorage.app",
+            messagingSenderId: "509215295074",
+            appId: "1:509215295074:web:2bb6485985db4b99e2333b"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Handle the login form submission
+        window.loginUser = async function(event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+            
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                // Firebase login
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                alert("Login successful!");
+                // Redirect to the dashboard after successful login
+                window.location.href = "dashboard.html";  // Redirect to dashboard
+            } catch (error) {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                alert(`Error: ${errorMessage}`);
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Main Login Container -->
+    <div class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-teal-500">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h2 class="text-3xl font-semibold text-center text-gray-700 mb-6">Welcome Back!</h2>
+            <p class="text-center text-gray-500 mb-8">Please log in to your account</p>
+
+            <!-- Login Form -->
+            <form onsubmit="loginUser(event)">
+                <!-- Email Field -->
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 font-medium">Email Address</label>
+                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your email" required>
+                </div>
+
+                <!-- Password Field -->
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-700 font-medium">Password</label>
+                    <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your password" required>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mb-4">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Login
+                    </button>
+                </div>
+
+                <!-- Forgot Password Link
+                <div class="text-center">
+                    <a href="#" class="text-blue-600 hover:text-blue-700">Forgot your password?</a>
+                </div> -->
+            </form>
+
+            <!-- Register Section
+            <div class="mt-6 text-center">
+                <p class="text-gray-700">Don't have an account?</p>
+                <a href="#" class="text-blue-600 hover:text-blue-700 font-semibold">Create an Account</a>
+            </div> -->
+        </div>
+    </div>
+
+</body>
+</html>
