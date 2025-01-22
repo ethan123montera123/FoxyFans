@@ -6,22 +6,22 @@
     <title>Application Status</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="flex min-h-screen">
+<body class="flex min-h-screen bg-white">
 
     <!-- Sidebar -->
-    <div class="bg-blue-600 w-full md:w-64 p-4 text-white flex flex-col justify-between">
+    <div class="bg-pink-600 w-full md:w-64 p-4 text-white flex flex-col justify-between">
         <div>
             <h2 class="text-2xl font-semibold mb-6">FoxyFans Dashboard</h2>
             <nav>
                 <ul>
                     <li>
-                        <a href="dashboard.html" id="homeLink" class="block py-2 px-4 rounded-lg hover:bg-blue-700 mb-2">Home</a>
+                        <a href="dashboard.html" id="homeLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Home</a>
                     </li>
                     <li>
-                        <a href="applicants.html" id="applicantsLink" class="block py-2 px-4 rounded-lg hover:bg-blue-700 mb-2" aria-current="page">Applicants</a>
+                        <a href="applicants.html" id="applicantsLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Applicants</a>
                     </li>
                     <li>
-                        <a href="status.html" id="statusLink" class="block py-2 px-4 rounded-lg hover:bg-blue-700 mb-2">Status</a>
+                        <a href="status.html" id="statusLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2" aria-current="page">Status</a>
                     </li>
                 </ul>
             </nav>
@@ -37,12 +37,12 @@
     <div class="flex-1 p-8 bg-gray-100">
         <!-- Container for Status Table -->
         <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-4xl mt-16 mb-16 mx-auto">
-            <h1 class="text-3xl font-semibold text-center text-gray-800 mb-6">Application Status</h1>
+            <h1 class="text-3xl font-semibold text-center text-pink-600 mb-6">Application Status</h1>
 
             <!-- Table to display client applications -->
             <table class="min-w-full table-auto border-collapse">
                 <thead>
-                    <tr class="bg-blue-600 text-white">
+                    <tr class="bg-pink-600 text-white">
                         <th class="py-3 px-4 text-left">Full Name</th>
                         <th class="py-3 px-4 text-left">Status</th>
                     </tr>
@@ -92,11 +92,11 @@
         // Add active class dynamically based on the current page
         const currentPage = window.location.pathname;
         if (currentPage.includes("dashboard.html")) {
-            document.getElementById("homeLink").classList.add("bg-blue-700");
+            document.getElementById("homeLink").classList.add("bg-pink-700");
         } else if (currentPage.includes("applicants.html")) {
-            document.getElementById("applicantsLink").classList.add("bg-blue-700");
+            document.getElementById("applicantsLink").classList.add("bg-pink-700");
         } else if (currentPage.includes("status.html")) {
-            document.getElementById("statusLink").classList.add("bg-blue-700");
+            document.getElementById("statusLink").classList.add("bg-pink-700");
         }
 
         // Logout function
