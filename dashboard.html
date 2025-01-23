@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | FoxyFans</title>
+    <title>Employee Salary Dashboard | FoxyFans</title>
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -11,7 +11,7 @@
     <script type="module">
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD2qO9-iCo9KZM_f2PxRMc2jG0nC13fDfQ",
@@ -43,102 +43,236 @@
             } catch (error) {
                 console.error("Error signing out: ", error);
             }
+        };
+
+        // Utility function to ensure a value is a number or defaults to 0
+        function sanitizeInput(value) {
+            return value.trim() === "" ? 0 : parseFloat(value);
         }
 
-        // Fetch applicants count from the status node
-        window.fetchApplicantCounts = function() {
-            const statusRef = ref(database, 'status');
-            onValue(statusRef, (snapshot) => {
+        // Save employee salary details to Firebase
+        window.saveEmployeeSalary = function() {
+            const name = document.getElementById('employeeName').value.trim();
+            const position = document.getElementById('employeePosition').value.trim();
+            const monday = sanitizeInput(document.getElementById('mondaySalary').value);
+            const tuesday = sanitizeInput(document.getElementById('tuesdaySalary').value);
+            const wednesday = sanitizeInput(document.getElementById('wednesdaySalary').value);
+            const thursday = sanitizeInput(document.getElementById('thursdaySalary').value);
+            const friday = sanitizeInput(document.getElementById('fridaySalary').value);
+            const saturday = sanitizeInput(document.getElementById('saturdaySalary').value);
+            const sunday = sanitizeInput(document.getElementById('sundaySalary').value);
+
+            if (name && position) {
+                const employeeRef = ref(database, 'employees/' + name);
+                set(employeeRef, {
+                    name: name,
+                    position: position,
+                    salary: { monday, tuesday, wednesday, thursday, friday, saturday, sunday }
+                }).then(() => {
+                    alert('Employee salary details saved successfully!');
+                    document.getElementById('salaryForm').reset();
+                    fetchAllSalaries();
+                }).catch((error) => {
+                    alert('Error saving salary details: ' + error.message);
+                });
+            } else {
+                alert('Please provide at least the employee name and position.');
+            }
+        };
+
+        // Fetch and display all employee salaries with total for the week
+        window.fetchAllSalaries = function() {
+            const employeesRef = ref(database, 'employees');
+            get(employeesRef).then((snapshot) => {
                 const data = snapshot.val();
+                const salaryTable = document.getElementById('salaryTable');
+                salaryTable.innerHTML = ''; // Clear previous table rows
+
                 if (data) {
-                    let processingCount = 0;
-                    let forReviewCount = 0;
-                    let acceptedCount = 0;
+                    Object.keys(data).forEach((employeeName) => {
+                        const employee = data[employeeName];
+                        const weeklyTotal = Object.values(employee.salary).reduce((total, salary) => total + parseFloat(salary), 0);
 
-                    // Count applicants in each status category
-                    if (data.Processing) {
-                        processingCount = Object.keys(data.Processing).length;
-                    }
-                    if (data['For Review']) {
-                        forReviewCount = Object.keys(data['For Review']).length;
-                    }
-                    if (data.Accepted) {
-                        acceptedCount = Object.keys(data.Accepted).length;
-                    }
+                        const row = document.createElement('tr');
+                        row.classList.add('text-center');
 
-                    // Update the counts on the page
-                    document.getElementById('processingCount').textContent = processingCount;
-                    document.getElementById('forReviewCount').textContent = forReviewCount;
-                    document.getElementById('acceptedCount').textContent = acceptedCount;
+                        row.innerHTML = `
+                            <td class="py-2 px-4 border">${employee.name}</td>
+                            <td class="py-2 px-4 border">${employee.position}</td>
+                            <td class="py-2 px-4 border">${employee.salary.monday}</td>
+                            <td class="py-2 px-4 border">${employee.salary.tuesday}</td>
+                            <td class="py-2 px-4 border">${employee.salary.wednesday}</td>
+                            <td class="py-2 px-4 border">${employee.salary.thursday}</td>
+                            <td class="py-2 px-4 border">${employee.salary.friday}</td>
+                            <td class="py-2 px-4 border">${employee.salary.saturday}</td>
+                            <td class="py-2 px-4 border">${employee.salary.sunday}</td>
+                            <td class="py-2 px-4 border font-bold">${weeklyTotal.toFixed(2)}</td>
+                            <td class="py-2 px-4 border">
+                                <button class="bg-yellow-500 text-white py-1 px-4 rounded-md" onclick="editSalary('${employee.name}')">Edit</button>
+                            </td>
+                        `;
+                        salaryTable.appendChild(row);
+                    });
+                } else {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="11" class="py-2 px-4 text-center">No employee data available</td>`;
+                    salaryTable.appendChild(row);
                 }
+            }).catch((error) => {
+                console.error('Error fetching employee data: ', error);
             });
         };
 
+        // Pre-fill the salary form with the existing data for editing
+        window.editSalary = function(name) {
+            const employeeRef = ref(database, 'employees/' + name);
+            get(employeeRef).then((snapshot) => {
+                const employee = snapshot.val();
+                if (employee) {
+                    document.getElementById('employeeName').value = employee.name;
+                    document.getElementById('employeePosition').value = employee.position;
+                    document.getElementById('mondaySalary').value = employee.salary.monday;
+                    document.getElementById('tuesdaySalary').value = employee.salary.tuesday;
+                    document.getElementById('wednesdaySalary').value = employee.salary.wednesday;
+                    document.getElementById('thursdaySalary').value = employee.salary.thursday;
+                    document.getElementById('fridaySalary').value = employee.salary.friday;
+                    document.getElementById('saturdaySalary').value = employee.salary.saturday;
+                    document.getElementById('sundaySalary').value = employee.salary.sunday;
+
+                    const saveButton = document.querySelector('button[type="button"]');
+                    saveButton.textContent = 'Update Salary';
+                    saveButton.setAttribute('onclick', `updateEmployeeSalary('${name}')`);
+                }
+            }).catch((error) => {
+                console.error('Error fetching employee data for edit: ', error);
+            });
+        };
+
+        // Update the salary after editing
+        window.updateEmployeeSalary = function(name) {
+            const position = document.getElementById('employeePosition').value.trim();
+            const monday = sanitizeInput(document.getElementById('mondaySalary').value);
+            const tuesday = sanitizeInput(document.getElementById('tuesdaySalary').value);
+            const wednesday = sanitizeInput(document.getElementById('wednesdaySalary').value);
+            const thursday = sanitizeInput(document.getElementById('thursdaySalary').value);
+            const friday = sanitizeInput(document.getElementById('fridaySalary').value);
+            const saturday = sanitizeInput(document.getElementById('saturdaySalary').value);
+            const sunday = sanitizeInput(document.getElementById('sundaySalary').value);
+
+            if (position) {
+                const employeeRef = ref(database, 'employees/' + name);
+                set(employeeRef, {
+                    name: name,
+                    position: position,
+                    salary: { monday, tuesday, wednesday, thursday, friday, saturday, sunday }
+                }).then(() => {
+                    alert('Employee salary details updated successfully!');
+                    document.getElementById('salaryForm').reset();
+                    fetchAllSalaries();
+                }).catch((error) => {
+                    alert('Error updating salary details: ' + error.message);
+                });
+
+                const saveButton = document.querySelector('button[type="button"]');
+                saveButton.textContent = 'Save Salary';
+                saveButton.setAttribute('onclick', 'saveEmployeeSalary()');
+            } else {
+                alert('Please provide the employee position.');
+            }
+        };
+
         window.onload = function() {
-            // Fetch the counts on page load
-            fetchApplicantCounts();
+            fetchAllSalaries();
         };
     </script>
 </head>
 <body class="bg-white">
 
     <div class="flex h-screen">
-
         <div class="bg-pink-600 w-full md:w-64 p-4 text-white flex flex-col justify-between">
             <div>
                 <h2 class="text-2xl font-semibold mb-6">FoxyFans Dashboard</h2>
                 <nav>
                     <ul>
-                        <li>
-                            <a href="dashboard.html" id="homeLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Home</a>
-                        </li>
-                        <li>
-                            <a href="applicants.html" id="applicantsLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Applicants</a>
-                        </li>
-                        <li>
-                            <a href="viewskillstest.html" id="skillsTestLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Skills Test</a>
-                        </li>
-                        <li>
-                            <a href="status.html" id="statusLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Status</a>
-                        </li>
+                        <li><a href="dashboard.html" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Salary</a></li>
+                        <li><a href="applicants.html" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Applicants</a></li>
+                        <li><a href="viewskillstest.html" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Skills Test</a></li>
+                        <li><a href="status.html" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Status</a></li>
                     </ul>
                 </nav>
             </div>
-    
             <div class="mt-auto">
-                <button onclick="logoutUser()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mt-4">
-                    Logout
-                </button>
+                <button onclick="logoutUser()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg">Logout</button>
             </div>
         </div>
-
-        <!-- Main Content -->
         <div class="flex-1 p-8 overflow-auto">
-
-            <!-- Applicant Status Counts -->
             <div class="mb-8">
-                <h3 class="text-xl font-semibold">Applicant Status</h3>
-                <p class="text-gray-600">Current count of applicants based on status.</p>
+                <h3 class="text-xl font-semibold">Employee Salary</h3>
+                <p class="text-gray-600">Input employee's salary details for each day of the week.</p>
             </div>
-
-            <!-- Status Counts -->
-            <div class="grid grid-cols-3 gap-4">
-                <div class="bg-white p-4 border rounded-lg shadow-lg">
-                    <h4 class="text-lg font-semibold text-gray-700">Processing</h4>
-                    <p class="text-xl font-bold text-gray-800" id="processingCount">0</p>
+            <form id="salaryForm" class="space-y-6">
+                <div>
+                    <label for="employeeName" class="block text-sm font-semibold text-gray-700">Employee Name</label>
+                    <input type="text" id="employeeName" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500" required>
                 </div>
-                <div class="bg-white p-4 border rounded-lg shadow-lg">
-                    <h4 class="text-lg font-semibold text-gray-700">For Review</h4>
-                    <p class="text-xl font-bold text-gray-800" id="forReviewCount">0</p>
+                <div>
+                    <label for="employeePosition" class="block text-sm font-semibold text-gray-700">Employee Position</label>
+                    <input type="text" id="employeePosition" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500" required>
                 </div>
-                <div class="bg-white p-4 border rounded-lg shadow-lg">
-                    <h4 class="text-lg font-semibold text-gray-700">Accepted</h4>
-                    <p class="text-xl font-bold text-gray-800" id="acceptedCount">0</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="mondaySalary" class="block text-sm font-semibold text-gray-700">Monday</label>
+                        <input type="number" id="mondaySalary" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    </div>
+                    <div>
+                        <label for="tuesdaySalary" class="block text-sm font-semibold text-gray-700">Tuesday</label>
+                        <input type="number" id="tuesdaySalary" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    </div>
+                    <div>
+                        <label for="wednesdaySalary" class="block text-sm font-semibold text-gray-700">Wednesday</label>
+                        <input type="number" id="wednesdaySalary" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    </div>
+                    <div>
+                        <label for="thursdaySalary" class="block text-sm font-semibold text-gray-700">Thursday</label>
+                        <input type="number" id="thursdaySalary" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    </div>
+                    <div>
+                        <label for="fridaySalary" class="block text-sm font-semibold text-gray-700">Friday</label>
+                        <input type="number" id="fridaySalary" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    </div>
+                    <div>
+                        <label for="saturdaySalary" class="block text-sm font-semibold text-gray-700">Saturday</label>
+                        <input type="number" id="saturdaySalary" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    </div>
+                    <div>
+                        <label for="sundaySalary" class="block text-sm font-semibold text-gray-700">Sunday</label>
+                        <input type="number" id="sundaySalary" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    </div>
                 </div>
-            </div>
-
+                <button type="button" onclick="saveEmployeeSalary()" class="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    Save Salary
+                </button>
+            </form>
+            <table class="w-full mt-8 border border-gray-300">
+                <thead class="bg-gray-200">
+                    <tr class="text-center">
+                        <th class="py-2 px-4 border">Name</th>
+                        <th class="py-2 px-4 border">Position</th>
+                        <th class="py-2 px-4 border">Monday</th>
+                        <th class="py-2 px-4 border">Tuesday</th>
+                        <th class="py-2 px-4 border">Wednesday</th>
+                        <th class="py-2 px-4 border">Thursday</th>
+                        <th class="py-2 px-4 border">Friday</th>
+                        <th class="py-2 px-4 border">Saturday</th>
+                        <th class="py-2 px-4 border">Sunday</th>
+                        <th class="py-2 px-4 border">Total</th>
+                        <th class="py-2 px-4 border">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="salaryTable">
+                </tbody>
+            </table>
         </div>
     </div>
-
 </body>
 </html>
