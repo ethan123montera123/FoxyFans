@@ -130,29 +130,48 @@
 </head>
 <body class="bg-white min-h-screen flex flex-col">
 
-    <!-- Header (Navigation Bar) -->
-    <header class="bg-pink-600 w-full p-4 text-white">
-        <div class="flex justify-between items-center">
-            <h2 class="text-2xl font-semibold">Dashboard</h2>
-            <nav>
-                <ul class="flex space-x-6">
-                    <li><a href="dashboard.html" class="hover:text-pink-300">Salary</a></li>
-                    <li><a href="applicants.html" class="hover:text-pink-300">Dashboard</a></li>
-                    <li><a href="viewskillstest.html" class="hover:text-pink-300">Skills Test</a></li>
-                    <li><a href="status.html" class="hover:text-pink-300">Status</a></li>
-                </ul>
-            </nav>
-            <button onclick="logoutUser()" class="bg-white text-black py-2 px-4 rounded-md hover:bg-pink-100">Logout</button>
-        </div>
-    </header>
+<!-- Header (Navigation Bar) -->
+<header class="bg-pink-300 w-full p-4 text-white">
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-semibold bg-white text-black px-4 py-2 rounded-lg">Dashboard</h2>
+        <nav>
+            <ul class="flex space-x-6">
+                <li>
+                    <a href="dashboard.html" class="hover:text-pink-600 hover:scale-110 transform transition duration-200">
+                        Salary
+                    </a>
+                </li>
+                <li>
+                    <a href="applicants.html" class="hover:text-pink-600 hover:scale-110 transform transition duration-200">
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="viewskillstest.html" class="hover:text-pink-600 hover:scale-110 transform transition duration-200">
+                        Skills Test
+                    </a>
+                </li>
+                <li>
+                    <a href="status.html" class="hover:text-pink-600 hover:scale-110 transform transition duration-200">
+                        Status
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <button onclick="logoutUser()" class="bg-white text-black py-2 px-4 rounded-md hover:bg-pink-100">
+            Logout
+        </button>
+    </div>
+</header>
+
 
     <!-- Main Content Area -->
     <div class="flex-1 p-8 overflow-y-auto">
-        <h1 class="text-2xl font-bold mb-6 text-pink-600">Applicants</h1>
+        <h1 class="text-2xl font-bold mb-6 text-pink-300">Applicants</h1>
         <input type="text" id="searchInput" class="border border-gray-300 rounded p-2 mb-4 w-full md:w-1/2" placeholder="Search by name...">
         <div class="overflow-x-auto">
             <table class="min-w-full border-collapse bg-white shadow-md rounded">
-                <thead class="bg-pink-600 text-white">
+                <thead class="bg-pink-300 text-white">
                     <tr>
                         <th class="py-2 px-4 text-center">ID</th>
                         <th class="py-2 px-4 text-center">Name</th>
