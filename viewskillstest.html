@@ -10,13 +10,14 @@
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
-            authDomain: "foxyfans-e9761.firebaseapp.com",
+            apiKey: "AIzaSyD2qO9-iCo9KZM_f2PxRMc2jG0nC13fDfQ",
+            authDomain: "foxyfanssystem.firebaseapp.com",
+            projectId: "foxyfanssystem",
             databaseURL: "https://foxyfans-e9761-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "foxyfans-e9761",
-            storageBucket: "foxyfans-e9761.appspot.com",
-            messagingSenderId: "509215295074",
-            appId: "1:509215295074:web:2bb6485985db4b99e2333b"
+            storageBucket: "foxyfanssystem.firebasestorage.app",
+            messagingSenderId: "47244410936",
+            appId: "1:47244410936:web:955fa26ac155360b8966cd",
+            measurementId: "G-2816BVCJEM"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -30,11 +31,13 @@
             const searchInput = document.getElementById('searchInput');
 
             onValue(applicantsRef, (snapshot) => {
+                console.log("Data snapshot:", snapshot.val());  // Log the entire snapshot
                 applicants = [];
                 applicantsTableBody.innerHTML = '';
                 snapshot.forEach((childSnapshot) => {
                     const applicant = childSnapshot.val();
                     applicants.push(applicant);
+                    console.log("applications:", applicant);  // Log each applicant
                 });
                 displayApplicants(applicants);
             });

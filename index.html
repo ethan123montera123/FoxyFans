@@ -57,16 +57,10 @@
                 <textarea id="workIssues" name="workIssues" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
 
-            <!-- Typing Test -->
+            <!-- Google Drive URL -->
             <div>
-                <label for="typingTest" class="block text-sm font-medium text-gray-700">Typing Test (55 WPM minimum)</label>
-                <input type="file" id="typingTest" name="typingTest" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
-            </div>
-
-            <!-- Proof of Logout -->
-            <div>
-                <label for="proofOfLogouts" class="block text-sm font-medium text-gray-700">Proof of Logout Reports (only if >$700)</label>
-                <input type="file" id="proofOfLogouts" name="proofOfLogouts" class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
+                <label for="googleDriveLink" class="block text-sm font-medium text-gray-700">Google Drive URL (for screenshots/images)</label>
+                <input type="url" id="googleDriveLink" name="googleDriveLink" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500" placeholder="Paste the Google Drive link here">
             </div>
 
             <!-- Telegram Username -->
@@ -83,42 +77,54 @@
         </form>
     </div>
 
+    <!-- Firebase script -->
     <script type="module">
+        // Import necessary Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics.js";
 
+        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
-            authDomain: "foxyfans-e9761.firebaseapp.com",
-            databaseURL: "https://foxyfans-e9761-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "foxyfans-e9761",
-            storageBucket: "foxyfans-e9761.firebasestorage.app",
-            messagingSenderId: "509215295074",
-            appId: "1:509215295074:web:2bb6485985db4b99e2333b"
+            apiKey: "AIzaSyD2qO9-iCo9KZM_f2PxRMc2jG0nC13fDfQ",
+            authDomain: "foxyfanssystem.firebaseapp.com",
+            projectId: "foxyfanssystem",
+            databaseURL: "https://foxyfanssystem-default-rtdb.asia-southeast1.firebasedatabase.app",
+            storageBucket: "foxyfanssystem.firebasestorage.app",
+            messagingSenderId: "47244410936",
+            appId: "1:47244410936:web:955fa26ac155360b8966cd",
+            measurementId: "G-2816BVCJEM"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
         const database = getDatabase(app);
 
+        // Form submission handler
         const form = document.getElementById('applicationForm');
         const statusMessage = document.getElementById('statusMessage');
+        
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             statusMessage.classList.remove('hidden');
 
+            // Form data
             const name = form.name.value;
             const location = form.location.value;
             const age = form.age.value;
             const workExperience = form.workExperience.value;
             const lastJobPerformance = form.lastJobPerformance.value;
             const workIssues = form.workIssues.value;
-            const typingTest = form.typingTest.files[0];
-            const proofOfLogouts = form.proofOfLogouts.files[0];
+            const googleDriveLink = form.googleDriveLink.value;
             const telegramUsername = form.telegramUsername.value;
 
             try {
+                // Create a new entry in the 'applications' node in Firebase Realtime Database
                 const newEntryRef = push(ref(database, 'applications'));
+
+                // Attempt to write data to Firebase
                 await set(newEntryRef, {
                     name,
                     location,
@@ -126,23 +132,21 @@
                     workExperience,
                     lastJobPerformance,
                     workIssues,
-                    typingTest: typingTest.name,
-                    proofOfLogouts: proofOfLogouts ? proofOfLogouts.name : null,
+                    googleDriveLink,
                     telegramUsername,
-                    status: 'Processing'
+                    status: 'Processing'  // Add a status field
                 });
 
-                // Store flag in localStorage after successful submission
-                localStorage.setItem('completedTest1', 'true');
-
+                // Success message
                 alert('Application submitted successfully!');
                 form.reset();
                 statusMessage.classList.add('hidden');
 
-                // Redirect to Test #2 after successful submission
-                window.location.href = "skillstest.html"; // URL for Test #2
+                // Redirect to Test #2 page after successful submission
+                window.location.href = "skillstest.html"; 
 
             } catch (error) {
+                // Log errors to the console
                 console.error('Error submitting application:', error);
                 alert('Failed to submit application. Please try again later.');
                 statusMessage.classList.add('hidden');
