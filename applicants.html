@@ -9,6 +9,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js"; // Firebase Storage import
 
         const firebaseConfig = {
             apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
@@ -23,6 +24,7 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         const auth = getAuth(app);
+        const storage = getStorage(app); // Initialize Firebase Storage
 
         let applicants = [];
 
@@ -84,11 +86,23 @@
             });
         }
 
-        window.viewImage = function(imageURL) {
+        window.viewImage = function(imagePath) {
             const modal = document.getElementById('imageModal');
             const modalImage = document.getElementById('modalImage');
-            modalImage.src = imageURL;
-            modal.classList.remove('hidden');
+
+            // Reference to the image in Firebase Storage
+            const imageRef = storageRef(storage, imagePath); 
+
+            // Get the download URL of the image
+            getDownloadURL(imageRef)
+                .then((url) => {
+                    // Set the image source to the download URL
+                    modalImage.src = url;
+                    modal.classList.remove('hidden');
+                })
+                .catch((error) => {
+                    console.error("Error fetching image:", error);
+                });
         };
 
         document.getElementById('closeModal').addEventListener('click', () => {

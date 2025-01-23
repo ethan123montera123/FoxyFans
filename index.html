@@ -8,57 +8,77 @@
 </head>
 <body class="bg-gradient-to-r from-pink-500 to-white min-h-screen flex justify-center items-center">
 
-    <div class="bg-white p-12 rounded-lg shadow-2xl w-full max-w-3xl transform transition-all duration-500 hover:scale-105 mt-16 mb-16">
-        <h1 class="text-4xl font-semibold text-center text-gray-800 mb-8">1ST FORM FOXYFANS CHATTER APPLICATION</h1>
+    <!-- Main container -->
+    <div class="bg-white p-10 rounded-lg shadow-2xl w-full max-w-3xl transform transition-all duration-500 hover:scale-105 mt-16 mb-16">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <img src="assets/logo.jpg" alt="Logo" class="mx-auto h-20">
+        </div>
 
+        <!-- Title -->
+        <h1 class="text-3xl font-semibold text-center text-gray-800 mb-8">1ST FORM FOXYFANS CHATTER APPLICATION</h1>
+
+        <!-- Form -->
         <form id="applicationForm" class="space-y-6">
+            
+            <!-- Full Name -->
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
                 <input type="text" id="name" name="name" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
             </div>
             
+            <!-- Location -->
             <div>
                 <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
                 <input type="text" id="location" name="location" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
             </div>
             
+            <!-- Age -->
             <div>
                 <label for="age" class="block text-sm font-medium text-gray-700">Age</label>
                 <input type="number" id="age" name="age" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
             </div>
 
+            <!-- Work Experience -->
             <div>
                 <label for="workExperience" class="block text-sm font-medium text-gray-700">Work Experience</label>
                 <textarea id="workExperience" name="workExperience" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
 
+            <!-- Last Job's Performance -->
             <div>
                 <label for="lastJobPerformance" class="block text-sm font-medium text-gray-700">Last Job's Performance</label>
                 <input type="text" id="lastJobPerformance" name="lastJobPerformance" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
             </div>
 
+            <!-- Work Issues -->
             <div>
                 <label for="workIssues" class="block text-sm font-medium text-gray-700">Work Issues (WiFi, Motivation, etc.)</label>
                 <textarea id="workIssues" name="workIssues" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
 
+            <!-- Typing Test -->
             <div>
                 <label for="typingTest" class="block text-sm font-medium text-gray-700">Typing Test (55 WPM minimum)</label>
                 <input type="file" id="typingTest" name="typingTest" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
             </div>
 
+            <!-- Proof of Logout -->
             <div>
                 <label for="proofOfLogouts" class="block text-sm font-medium text-gray-700">Proof of Logout Reports (only if >$700)</label>
                 <input type="file" id="proofOfLogouts" name="proofOfLogouts" class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
             </div>
 
+            <!-- Telegram Username -->
             <div>
                 <label for="telegramUsername" class="block text-sm font-medium text-gray-700">Telegram Username</label>
                 <input type="text" id="telegramUsername" name="telegramUsername" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
             </div>
 
+            <!-- Status message -->
             <div id="statusMessage" class="text-center text-sm text-blue-500 hidden">Processing...</div>
 
+            <!-- Submit Button -->
             <button type="submit" class="w-full bg-pink-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200">Submit</button>
         </form>
     </div>
