@@ -11,14 +11,14 @@
     <script type="module">
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD2qO9-iCo9KZM_f2PxRMc2jG0nC13fDfQ",
             authDomain: "foxyfanssystem.firebaseapp.com",
             databaseURL: "https://foxyfanssystem-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "foxyfanssystem",
-            storageBucket: "foxyfanssystem.firebasestorage.app",
+            storageBucket: "foxyfanssystem.appspot.com",
             messagingSenderId: "47244410936",
             appId: "1:47244410936:web:955fa26ac155360b8966cd",
             measurementId: "G-2816BVCJEM"
@@ -123,62 +123,32 @@
             });
         };
 
-        // Pre-fill the salary form with the existing data for editing
-        window.editSalary = function(name) {
-            const employeeRef = ref(database, 'employees/' + name);
-            get(employeeRef).then((snapshot) => {
-                const employee = snapshot.val();
-                if (employee) {
-                    document.getElementById('employeeName').value = employee.name;
-                    document.getElementById('employeePosition').value = employee.position;
-                    document.getElementById('mondaySalary').value = employee.salary.monday;
-                    document.getElementById('tuesdaySalary').value = employee.salary.tuesday;
-                    document.getElementById('wednesdaySalary').value = employee.salary.wednesday;
-                    document.getElementById('thursdaySalary').value = employee.salary.thursday;
-                    document.getElementById('fridaySalary').value = employee.salary.friday;
-                    document.getElementById('saturdaySalary').value = employee.salary.saturday;
-                    document.getElementById('sundaySalary').value = employee.salary.sunday;
+        // Archive employee salaries and reset the current data
+        window.archiveAndResetData = function() {
+            const employeesRef = ref(database, 'employees');
+            const archiveRef = ref(database, 'archived_employees/' + new Date().toISOString().slice(0, 10)); // Archive with current date
 
-                    const saveButton = document.querySelector('button[type="button"]');
-                    saveButton.textContent = 'Update Salary';
-                    saveButton.setAttribute('onclick', `updateEmployeeSalary('${name}')`);
+            get(employeesRef).then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    // Move data to archive
+                    set(archiveRef, data).then(() => {
+                        // Clear the current data
+                        set(employeesRef, null).then(() => {
+                            alert('Data archived and reset successfully!');
+                            fetchAllSalaries(); // Refresh the table
+                        }).catch((error) => {
+                            console.error('Error clearing current data: ', error);
+                        });
+                    }).catch((error) => {
+                        console.error('Error archiving data: ', error);
+                    });
+                } else {
+                    alert('No data to archive.');
                 }
             }).catch((error) => {
-                console.error('Error fetching employee data for edit: ', error);
+                console.error('Error fetching employee data for archiving: ', error);
             });
-        };
-
-        // Update the salary after editing
-        window.updateEmployeeSalary = function(name) {
-            const position = document.getElementById('employeePosition').value.trim();
-            const monday = sanitizeInput(document.getElementById('mondaySalary').value);
-            const tuesday = sanitizeInput(document.getElementById('tuesdaySalary').value);
-            const wednesday = sanitizeInput(document.getElementById('wednesdaySalary').value);
-            const thursday = sanitizeInput(document.getElementById('thursdaySalary').value);
-            const friday = sanitizeInput(document.getElementById('fridaySalary').value);
-            const saturday = sanitizeInput(document.getElementById('saturdaySalary').value);
-            const sunday = sanitizeInput(document.getElementById('sundaySalary').value);
-
-            if (position) {
-                const employeeRef = ref(database, 'employees/' + name);
-                set(employeeRef, {
-                    name: name,
-                    position: position,
-                    salary: { monday, tuesday, wednesday, thursday, friday, saturday, sunday }
-                }).then(() => {
-                    alert('Employee salary details updated successfully!');
-                    document.getElementById('salaryForm').reset();
-                    fetchAllSalaries();
-                }).catch((error) => {
-                    alert('Error updating salary details: ' + error.message);
-                });
-
-                const saveButton = document.querySelector('button[type="button"]');
-                saveButton.textContent = 'Save Salary';
-                saveButton.setAttribute('onclick', 'saveEmployeeSalary()');
-            } else {
-                alert('Please provide the employee position.');
-            }
         };
 
         window.onload = function() {
@@ -252,24 +222,28 @@
                 <button type="button" onclick="saveEmployeeSalary()" class="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
                     Save Salary
                 </button>
+                <button type="button" onclick="archiveAndResetData()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 mt-4">
+                    Archive and Reset Weekly Data
+                </button>
             </form>
             <table class="w-full mt-8 border border-gray-300">
                 <thead class="bg-gray-200">
                     <tr class="text-center">
                         <th class="py-2 px-4 border">Name</th>
                         <th class="py-2 px-4 border">Position</th>
-                        <th class="py-2 px-4 border">Monday</th>
-                        <th class="py-2 px-4 border">Tuesday</th>
-                        <th class="py-2 px-4 border">Wednesday</th>
-                        <th class="py-2 px-4 border">Thursday</th>
-                        <th class="py-2 px-4 border">Friday</th>
-                        <th class="py-2 px-4 border">Saturday</th>
-                        <th class="py-2 px-4 border">Sunday</th>
+                        <th class="py-2 px-4 border">Mon</th>
+                        <th class="py-2 px-4 border">Tue</th>
+                        <th class="py-2 px-4 border">Wed</th>
+                        <th class="py-2 px-4 border">Thu</th>
+                        <th class="py-2 px-4 border">Fri</th>
+                        <th class="py-2 px-4 border">Sat</th>
+                        <th class="py-2 px-4 border">Sun</th>
                         <th class="py-2 px-4 border">Total</th>
                         <th class="py-2 px-4 border">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="salaryTable">
+                    <!-- Data dynamically loaded -->
                 </tbody>
             </table>
         </div>
