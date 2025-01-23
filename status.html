@@ -14,10 +14,10 @@
             <nav>
                 <ul>
                     <li class="mb-2 border border-white rounded-lg">
-                        <a href="dashboard.html" class="block py-2 px-4 bg-white text-black rounded-lg transition transform hover:scale-105 hover:bg-pink-600 hover:text-white">Dashboard</a>
+                        <a href="dashboard.html" id="homeLink" class="block py-2 px-4 bg-white text-black rounded-lg transition transform hover:scale-105 hover:bg-pink-600 hover:text-white">Dashboard</a>
                     </li>
                     <li class="mb-2 border border-white rounded-lg">
-                        <a href="applicants.html" class="block py-2 px-4 bg-white text-black rounded-lg transition transform hover:scale-105 hover:bg-pink-600 hover:text-white">Applicants</a>
+                        <a href="applicants.html" id="applicantsLink" class="block py-2 px-4 bg-white text-black rounded-lg transition transform hover:scale-105 hover:bg-pink-600 hover:text-white">Applicants</a>
                     </li>
                     <li class="mb-2 border border-white rounded-lg">
                         <a href="viewskillstest.html" class="block py-2 px-4 bg-white text-black rounded-lg transition transform hover:scale-105 hover:bg-pink-600 hover:text-white">Skills Test</a>
@@ -33,7 +33,7 @@
                 Logout
             </button>
         </div>
-    </div>   
+    </div>
 
     <div class="flex-1 p-8 bg-gray-100">
         <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-4xl mt-16 mb-16 mx-auto">
@@ -47,6 +47,7 @@
                     </tr>
                 </thead>
                 <tbody id="statusTable" class="text-gray-700">
+                    <!-- Data will be populated here -->
                 </tbody>
             </table>
         </div>
@@ -56,6 +57,7 @@
         <div class="bg-white p-8 rounded-lg shadow-2xl w-96">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Applicant Details</h2>
             <div id="applicantDetails" class="space-y-4 text-gray-700">
+                <!-- Applicant details will be populated here -->
             </div>
             <div class="flex justify-end mt-4">
                 <button onclick="closeModal()" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700">Close</button>
@@ -85,11 +87,14 @@
 
         const currentPage = window.location.pathname;
         if (currentPage.includes("dashboard.html")) {
-            document.getElementById("homeLink").classList.add("bg-pink-700");
+            const homeLink = document.getElementById("homeLink");
+            if (homeLink) homeLink.classList.add("bg-pink-700");
         } else if (currentPage.includes("applicants.html")) {
-            document.getElementById("applicantsLink").classList.add("bg-pink-700");
+            const applicantsLink = document.getElementById("applicantsLink");
+            if (applicantsLink) applicantsLink.classList.add("bg-pink-700");
         } else if (currentPage.includes("status.html")) {
-            document.getElementById("statusLink").classList.add("bg-pink-700");
+            const statusLink = document.getElementById("statusLink");
+            if (statusLink) statusLink.classList.add("bg-pink-700");
         }
 
         window.logoutUser = async function() {
@@ -115,9 +120,12 @@
             statusTable.innerHTML = '';
 
             const data = snapshot.val();
+            console.log("Fetched data:", data); // Check data structure
+
             if (data) {
                 Object.keys(data).forEach((key) => {
                     const application = data[key];
+                    console.log("Processing application:", application); // Check each application data
 
                     const row = document.createElement('tr');
                     row.classList.add('border-t', 'border-gray-300');
