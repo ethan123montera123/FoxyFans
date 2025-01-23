@@ -221,30 +221,30 @@
                 <ul class="flex space-x-6">
                     <li>
                         <a href="dashboard.html" 
-                           class="hover:underline transform transition duration-200 uppercase"
-                           :class="{'underline': window.location.pathname === '/dashboard.html'}">
-                            SALARY
+                           class="relative group transform transition duration-300 uppercase">
+                            <span class="hover:underline block">SALARY</span>
+                            <span class="absolute bottom-0 left-0 w-full h-1 bg-white scale-x-0 group-hover:scale-x-100 transform transition-transform duration-300"></span>
                         </a>
                     </li>
                     <li>
                         <a href="applicants.html" 
-                           class="hover:underline transform transition duration-200 uppercase"
-                           :class="{'underline': window.location.pathname === '/applicants.html'}">
-                            DASHBOARD
+                           class="relative group transform transition duration-300 uppercase">
+                            <span class="hover:underline block">DASHBOARD</span>
+                            <span class="absolute bottom-0 left-0 w-full h-1 bg-white scale-x-0 group-hover:scale-x-100 transform transition-transform duration-300"></span>
                         </a>
                     </li>
                     <li>
                         <a href="viewskillstest.html" 
-                           class="hover:underline transform transition duration-200 uppercase"
-                           :class="{'underline': window.location.pathname === '/viewskillstest.html'}">
-                            SKILL TEST
+                           class="relative group transform transition duration-300 uppercase">
+                            <span class="hover:underline block">SKILL TEST</span>
+                            <span class="absolute bottom-0 left-0 w-full h-1 bg-white scale-x-0 group-hover:scale-x-100 transform transition-transform duration-300"></span>
                         </a>
                     </li>
                     <li>
                         <a href="status.html" 
-                           class="hover:underline transform transition duration-200 uppercase"
-                           :class="{'underline': window.location.pathname === '/status.html'}">
-                            STATUS
+                           class="relative group transform transition duration-300 uppercase">
+                            <span class="hover:underline block">STATUS</span>
+                            <span class="absolute bottom-0 left-0 w-full h-1 bg-white scale-x-0 group-hover:scale-x-100 transform transition-transform duration-300"></span>
                         </a>
                     </li>
                 </ul>
@@ -255,8 +255,6 @@
         </button>
     </div>
 </header>
-
-
 
     <!-- Main content -->
     <div class="flex-1 p-8 overflow-auto">
