@@ -8,7 +8,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
@@ -22,18 +21,11 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const auth = getAuth(app);
 
         let applicants = [];
 
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "login.html";
-            }
-        });
-
         document.addEventListener('DOMContentLoaded', () => {
-            const applicantsRef = ref(database, 'applications');
+            const applicantsRef = ref(database, 'Skill Level Test');
             const applicantsTableBody = document.getElementById('applicantsTableBody');
             const searchInput = document.getElementById('searchInput');
 
@@ -65,44 +57,21 @@
                 row.innerHTML = `
                     <td class="py-2 px-4 text-center">${index + 1}</td>
                     <td class="py-2 px-4 text-center">${applicant.name}</td>
-                    <td class="py-2 px-4 text-center">${applicant.location}</td>
-                    <td class="py-2 px-4 text-center">${applicant.age}</td>
-                    <td class="py-2 px-4 text-center">${applicant.workExperience}</td>
-                    <td class="py-2 px-4 text-center">${applicant.lastJobPerformance}</td>
-                    <td class="py-2 px-4 text-center">${applicant.workIssues}</td>
-                    <td class="py-2 px-4 text-center">
-                        <button class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600" 
-                                onclick="viewImage('${applicant.typingTest}')">View Typing Test</button>
-                    </td>
-                    <td class="py-2 px-4 text-center">
-                        <button class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600" 
-                                onclick="viewImage('${applicant.proofOfLogouts}')">View Proof of Logouts</button>
-                    </td>
-                    <td class="py-2 px-4 text-center">${applicant.telegramUsername}</td>
+                    <td class="py-2 px-4 text-center">${applicant.freestyleCaptions}</td>
+                    <td class="py-2 px-4 text-center">${applicant.methodsToMakeOver300}</td>
+                    <td class="py-2 px-4 text-center">${applicant.handlingObjections}</td>
+                    <td class="py-2 px-4 text-center">${applicant.meetingFans}</td>
+                    <td class="py-2 px-4 text-center">${applicant.ppvFirstOpen}</td>
                 `;
                 applicantsTableBody.appendChild(row);
             });
         }
 
-        window.viewImage = function(imageURL) {
-            const modal = document.getElementById('imageModal');
-            const modalImage = document.getElementById('modalImage');
-            modalImage.src = imageURL;
-            modal.classList.remove('hidden');
-        };
-
-        document.getElementById('closeModal').addEventListener('click', () => {
-            const modal = document.getElementById('imageModal');
-            modal.classList.add('hidden');
-        });
-
-        window.logoutUser = async function() {
+        window.logoutUser = function() {
             try {
-                await signOut(auth);
-                alert("You have been logged out.");
                 window.location.href = "login.html";
             } catch (error) {
-                console.error("Error signing out: ", error);
+                console.error("Error: ", error);
             }
         };
     </script>
@@ -134,7 +103,7 @@
     </div>
 
     <div class="flex-1 p-8 overflow-y-auto">
-        <h1 class="text-2xl font-bold mb-6 text-pink-600">Applicants</h1>
+        <h1 class="text-2xl font-bold mb-6 text-pink-600">SKILL LEVEL TEST SUBMISSIONS</h1>
 
         <input type="text" id="searchInput" class="border border-gray-300 rounded p-2 mb-4 w-full md:w-1/2" placeholder="Search by name...">
 
@@ -144,29 +113,16 @@
                     <tr>
                         <th class="py-2 px-4 text-center">ID</th>
                         <th class="py-2 px-4 text-center">Name</th>
-                        <th class="py-2 px-4 text-center">Location</th>
-                        <th class="py-2 px-4 text-center">Age</th>
-                        <th class="py-2 px-4 text-center">Work Experience</th>
-                        <th class="py-2 px-4 text-center">Performance</th>
-                        <th class="py-2 px-4 text-center">Work Issues</th>
-                        <th class="py-2 px-4 text-center">Typing Test</th>
-                        <th class="py-2 px-4 text-center">Proof of Logouts</th>
-                        <th class="py-2 px-4 text-center">Telegram</th>
+                        <th class="py-2 px-4 text-center">Freestyle Captions</th>
+                        <th class="py-2 px-4 text-center">Methods to Make Over $300</th>
+                        <th class="py-2 px-4 text-center">Handling Objections</th>
+                        <th class="py-2 px-4 text-center">Meeting Fans</th>
+                        <th class="py-2 px-4 text-center">PPV Opening Techniques</th>
                     </tr>
                 </thead>
                 <tbody id="applicantsTableBody">
                 </tbody>
             </table>
-        </div>
-    </div>
-
-    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg overflow-hidden w-1/2">
-            <div class="flex justify-between items-center p-4 bg-pink-600 text-white">
-                <h3 class="text-lg font-semibold">Image Viewer</h3>
-                <button id="closeModal" class="text-white hover:text-gray-200">X</button>
-            </div>
-            <img id="modalImage" class="w-full h-auto" src="" alt="Applicant Image">
         </div>
     </div>
 
