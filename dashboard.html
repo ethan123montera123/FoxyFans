@@ -21,7 +21,7 @@
             apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
             authDomain: "foxyfans-e9761.firebaseapp.com",
             projectId: "foxyfans-e9761",
-            storageBucket: "foxyfans-e9761.firebasestorage.app",
+            storageBucket: "foxyfans-e9761.appspot.com",
             messagingSenderId: "509215295074",
             appId: "1:509215295074:web:2bb6485985db4b99e2333b"
         };
@@ -47,7 +47,7 @@
             }
         }
 
-        // Fetch applicants and show available interviews
+        // Fetch applicants and populate dropdown
         window.fetchApplicants = function() {
             const applicationsRef = ref(database, 'applications');
             onValue(applicationsRef, (snapshot) => {
@@ -60,8 +60,8 @@
                     Object.keys(data).forEach((key) => {
                         const applicant = data[key];
                         const option = document.createElement('option');
-                        option.value = key;
-                        option.textContent = applicant.name; // Display only the applicant's name
+                        option.value = key; // Use unique applicant ID as the value
+                        option.textContent = applicant.name; // Display applicant's name
                         applicantSelect.appendChild(option);
                     });
                 }
