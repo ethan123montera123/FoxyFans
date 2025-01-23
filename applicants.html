@@ -6,11 +6,13 @@
     <title>Applicants</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
+        // Firebase imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
         import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyD2qO9-iCo9KZM_f2PxRMc2jG0nC13fDfQ",
             authDomain: "foxyfanssystem.firebaseapp.com",
@@ -22,6 +24,7 @@
             measurementId: "G-2816BVCJEM"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         const auth = getAuth(app);
@@ -29,12 +32,14 @@
 
         let applicants = [];
 
+        // Auth state change listener
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "login.html";
             }
         });
 
+        // Firebase Data Fetch
         document.addEventListener('DOMContentLoaded', () => {
             const applicantsRef = ref(database, 'applications');
             const applicantsTableBody = document.getElementById('applicantsTableBody');
@@ -45,6 +50,7 @@
                 applicantsTableBody.innerHTML = '';
                 snapshot.forEach((childSnapshot) => {
                     const applicant = childSnapshot.val();
+                    applicant.id = childSnapshot.key;  // Store applicant ID
                     applicants.push(applicant);
                 });
                 displayApplicants(applicants);
@@ -61,6 +67,7 @@
             });
         });
 
+        // Function to display applicants in the table
         function displayApplicants(applicants) {
             const applicantsTableBody = document.getElementById('applicantsTableBody');
             applicantsTableBody.innerHTML = '';
@@ -79,11 +86,37 @@
                         <a href="${applicant.googleDriveLink}" target="_blank" class="text-blue-600 hover:underline">View Google Drive</a>
                     </td>
                     <td class="py-2 px-4 text-center">${applicant.telegramUsername}</td>
+                    <td class="py-2 px-4 text-center">
+                        <button onclick="window.deleteApplicant('${applicant.id}')" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Delete</button>
+                    </td>
                 `;
                 applicantsTableBody.appendChild(row);
             });
         }
 
+        // Delete applicant function
+        window.deleteApplicant = async function(applicantId) {
+            const applicantRef = ref(database, 'applications/' + applicantId);
+
+            // Debugging: Log the ID to ensure it's being passed correctly
+            console.log('Deleting applicant with ID:', applicantId);
+
+            // Confirm before deleting
+            if (confirm("Are you sure you want to delete this applicant?")) {
+                try {
+                    // Remove the applicant from the database
+                    await remove(applicantRef);
+                    alert("Applicant deleted successfully.");
+                    // Refresh the table by reloading the page or removing the row
+                    document.location.reload();
+                } catch (error) {
+                    console.error("Error deleting applicant:", error);
+                    alert("Failed to delete applicant.");
+                }
+            }
+        }
+
+        // Logout function
         window.logoutUser = async function() {
             try {
                 await signOut(auth);
@@ -130,6 +163,7 @@
                         <th class="py-2 px-4 text-center">Work Issues</th>
                         <th class="py-2 px-4 text-center">Google Drive URL</th>
                         <th class="py-2 px-4 text-center">Telegram</th>
+                        <th class="py-2 px-4 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody id="applicantsTableBody">

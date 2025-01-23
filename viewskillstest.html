@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD2qO9-iCo9KZM_f2PxRMc2jG0nC13fDfQ",
@@ -35,12 +35,13 @@
                 applicantsTableBody.innerHTML = '';
                 snapshot.forEach((childSnapshot) => {
                     const applicant = childSnapshot.val();
+                    applicant.id = childSnapshot.key;  // Store applicant ID from Firebase
                     applicants.push(applicant);
                 });
                 displayApplicants(applicants);
             }, (error) => {
                 console.error("Error fetching data:", error);
-                applicantsTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Error loading applicants. Please try again later.</td></tr>`;
+                applicantsTableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4">Error loading applicants. Please try again later.</td></tr>`;
             });
 
             searchInput.addEventListener('input', () => {
@@ -58,7 +59,6 @@
             applicants.forEach((applicant, index) => {
                 const row = document.createElement('tr');
                 row.className = "border-b";
-
                 row.innerHTML = `
                     <td class="py-2 px-4 text-center">${index + 1}</td>
                     <td class="py-2 px-4 text-center">${applicant.name}</td>
@@ -67,9 +67,30 @@
                     <td class="py-2 px-4 text-center">${applicant.handlingObjections}</td>
                     <td class="py-2 px-4 text-center">${applicant.meetingFans}</td>
                     <td class="py-2 px-4 text-center">${applicant.ppvFirstOpen}</td>
+                    <td class="py-2 px-4 text-center">
+                        <button onclick="deleteApplicant('${applicant.id}')" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Delete</button>
+                    </td>
                 `;
                 applicantsTableBody.appendChild(row);
             });
+        }
+
+        window.deleteApplicant = async function(applicantId) {
+            const applicantRef = ref(database, 'Skill Level Test/' + applicantId);
+            
+            // Confirm before deleting
+            if (confirm("Are you sure you want to delete this submission?")) {
+                try {
+                    // Remove the applicant from the database
+                    await remove(applicantRef);
+                    alert("Applicant deleted successfully.");
+                    // Refresh the table by reloading the page or removing the row
+                    document.location.reload();
+                } catch (error) {
+                    console.error("Error deleting applicant:", error);
+                    alert("Failed to delete applicant.");
+                }
+            }
         }
 
         window.logoutUser = function() {
@@ -131,6 +152,7 @@
                         <th class="py-2 px-4 text-center">Handling Objections</th>
                         <th class="py-2 px-4 text-center">Meeting Fans</th>
                         <th class="py-2 px-4 text-center">PPV Opening Techniques</th>
+                        <th class="py-2 px-4 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody id="applicantsTableBody">
