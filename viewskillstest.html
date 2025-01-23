@@ -26,18 +26,16 @@
         let applicants = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            const applicantsRef = ref(database, 'Skill Level Test'); // Correct reference path
+            const applicantsRef = ref(database, 'Skill Level Test');
             const applicantsTableBody = document.getElementById('applicantsTableBody');
             const searchInput = document.getElementById('searchInput');
 
             onValue(applicantsRef, (snapshot) => {
-                console.log("Data snapshot:", snapshot.val());  // Log the entire snapshot
                 applicants = [];
-                applicantsTableBody.innerHTML = ''; // Clear previous data
+                applicantsTableBody.innerHTML = '';
                 snapshot.forEach((childSnapshot) => {
                     const applicant = childSnapshot.val();
                     applicants.push(applicant);
-                    console.log("Applicant:", applicant);  // Log each applicant for debugging
                 });
                 displayApplicants(applicants);
             }, (error) => {
@@ -60,6 +58,7 @@
             applicants.forEach((applicant, index) => {
                 const row = document.createElement('tr');
                 row.className = "border-b";
+
                 row.innerHTML = `
                     <td class="py-2 px-4 text-center">${index + 1}</td>
                     <td class="py-2 px-4 text-center">${applicant.name}</td>
@@ -75,12 +74,28 @@
 
         window.logoutUser = function() {
             try {
-                window.location.href = "login.html"; // Redirect to login page
+                window.location.href = "login.html";
             } catch (error) {
                 console.error("Error: ", error);
             }
         };
     </script>
+    <style>
+        .table-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: auto;
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            table-layout: fixed;
+        }
+        th, td {
+            word-wrap: break-word;
+            text-align: center;
+        }
+    </style>
 </head>
 <body class="bg-white min-h-screen flex flex-col md:flex-row">
 
@@ -116,7 +131,7 @@
 
         <input type="text" id="searchInput" class="border border-gray-300 rounded p-2 mb-4 w-full md:w-1/2" placeholder="Search by name...">
 
-        <div class="overflow-x-auto">
+        <div class="table-container">
             <table class="min-w-full border-collapse bg-white shadow-md rounded">
                 <thead class="bg-pink-600 text-white">
                     <tr>
