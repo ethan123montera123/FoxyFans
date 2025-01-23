@@ -28,6 +28,8 @@
         const auth = getAuth(app);
         const database = getDatabase(app);
 
+        let editingEmployee = null;
+
         // Check if the user is logged in
         onAuthStateChanged(auth, (user) => {
             if (!user) {
@@ -50,31 +52,58 @@
             return value.trim() === "" ? 0 : parseFloat(value);
         }
 
-        // Save employee salary details to Firebase
+        // Save or update employee salary details to Firebase
         window.saveEmployeeSalary = function() {
             const name = document.getElementById('employeeName').value.trim();
             const position = document.getElementById('employeePosition').value.trim();
-            const monday = sanitizeInput(document.getElementById('mondaySalary').value);
-            const tuesday = sanitizeInput(document.getElementById('tuesdaySalary').value);
-            const wednesday = sanitizeInput(document.getElementById('wednesdaySalary').value);
-            const thursday = sanitizeInput(document.getElementById('thursdaySalary').value);
-            const friday = sanitizeInput(document.getElementById('fridaySalary').value);
-            const saturday = sanitizeInput(document.getElementById('saturdaySalary').value);
-            const sunday = sanitizeInput(document.getElementById('sundaySalary').value);
+            let monday = sanitizeInput(document.getElementById('mondaySalary').value);
+            let tuesday = sanitizeInput(document.getElementById('tuesdaySalary').value);
+            let wednesday = sanitizeInput(document.getElementById('wednesdaySalary').value);
+            let thursday = sanitizeInput(document.getElementById('thursdaySalary').value);
+            let friday = sanitizeInput(document.getElementById('fridaySalary').value);
+            let saturday = sanitizeInput(document.getElementById('saturdaySalary').value);
+            let sunday = sanitizeInput(document.getElementById('sundaySalary').value);
+
+            // Apply the specific computation (input * 0.8 and the result * 0.04)
+            monday = (monday * 0.8) * 0.04;
+            tuesday = (tuesday * 0.8) * 0.04;
+            wednesday = (wednesday * 0.8) * 0.04;
+            thursday = (thursday * 0.8) * 0.04;
+            friday = (friday * 0.8) * 0.04;
+            saturday = (saturday * 0.8) * 0.04;
+            sunday = (sunday * 0.8) * 0.04;
 
             if (name && position) {
                 const employeeRef = ref(database, 'employees/' + name);
-                set(employeeRef, {
-                    name: name,
-                    position: position,
-                    salary: { monday, tuesday, wednesday, thursday, friday, saturday, sunday }
-                }).then(() => {
-                    alert('Employee salary details saved successfully!');
-                    document.getElementById('salaryForm').reset();
-                    fetchAllSalaries();
-                }).catch((error) => {
-                    alert('Error saving salary details: ' + error.message);
-                });
+
+                if (editingEmployee) {
+                    // Update existing employee data
+                    set(employeeRef, {
+                        name: name,
+                        position: position,
+                        salary: { monday, tuesday, wednesday, thursday, friday, saturday, sunday }
+                    }).then(() => {
+                        alert('Employee salary updated successfully!');
+                        document.getElementById('salaryForm').reset();
+                        fetchAllSalaries();
+                        editingEmployee = null; // Reset editing state
+                    }).catch((error) => {
+                        alert('Error updating salary details: ' + error.message);
+                    });
+                } else {
+                    // Save new employee data
+                    set(employeeRef, {
+                        name: name,
+                        position: position,
+                        salary: { monday, tuesday, wednesday, thursday, friday, saturday, sunday }
+                    }).then(() => {
+                        alert('Employee salary details saved successfully!');
+                        document.getElementById('salaryForm').reset();
+                        fetchAllSalaries();
+                    }).catch((error) => {
+                        alert('Error saving salary details: ' + error.message);
+                    });
+                }
             } else {
                 alert('Please provide at least the employee name and position.');
             }
@@ -120,6 +149,31 @@
                 }
             }).catch((error) => {
                 console.error('Error fetching employee data: ', error);
+            });
+        };
+
+        // Edit employee salary details (populate the form)
+        window.editSalary = function(employeeName) {
+            const employeeRef = ref(database, 'employees/' + employeeName);
+            get(employeeRef).then((snapshot) => {
+                const employee = snapshot.val();
+                if (employee) {
+                    // Set form fields to the employee data
+                    document.getElementById('employeeName').value = employee.name;
+                    document.getElementById('employeePosition').value = employee.position;
+                    document.getElementById('mondaySalary').value = employee.salary.monday;
+                    document.getElementById('tuesdaySalary').value = employee.salary.tuesday;
+                    document.getElementById('wednesdaySalary').value = employee.salary.wednesday;
+                    document.getElementById('thursdaySalary').value = employee.salary.thursday;
+                    document.getElementById('fridaySalary').value = employee.salary.friday;
+                    document.getElementById('saturdaySalary').value = employee.salary.saturday;
+                    document.getElementById('sundaySalary').value = employee.salary.sunday;
+
+                    // Set the editingEmployee flag to identify we are editing
+                    editingEmployee = employee;
+                }
+            }).catch((error) => {
+                console.error('Error fetching employee data for editing: ', error);
             });
         };
 
