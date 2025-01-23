@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Application Form</title>
+    <title>Test #1 Application Form</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-r from-pink-500 to-white min-h-screen flex justify-center items-center">
 
     <div class="bg-white p-12 rounded-lg shadow-2xl w-full max-w-3xl transform transition-all duration-500 hover:scale-105 mt-16 mb-16">
-        <h1 class="text-4xl font-semibold text-center text-gray-800 mb-8">Join Our Team!</h1>
+        <h1 class="text-4xl font-semibold text-center text-gray-800 mb-8">1ST FORM FOXYFANS CHATTER APPLICATION</h1>
 
         <form id="applicationForm" class="space-y-6">
             <div>
@@ -111,9 +111,17 @@
                     telegramUsername,
                     status: 'Processing'
                 });
+
+                // Store flag in localStorage after successful submission
+                localStorage.setItem('completedTest1', 'true');
+
                 alert('Application submitted successfully!');
                 form.reset();
                 statusMessage.classList.add('hidden');
+
+                // Redirect to Test #2 after successful submission
+                window.location.href = "skillstest.html"; // URL for Test #2
+
             } catch (error) {
                 console.error('Error submitting application:', error);
                 alert('Failed to submit application. Please try again later.');

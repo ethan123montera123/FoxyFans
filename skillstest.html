@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKILL LEVEL TEST</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-pink-500 to-white min-h-screen flex justify-center items-center">
+
+    <div class="bg-white p-12 rounded-lg shadow-2xl w-full max-w-3xl transform transition-all duration-500 hover:scale-105 mt-16 mb-16">
+        <h1 class="text-4xl font-semibold text-center text-gray-800 mb-8">SKILL LEVEL TEST</h1>
+
+        <form id="applicationForm2" class="space-y-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                <input type="text" id="name" name="name" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="freestyleCaptions" class="block text-sm font-medium text-gray-700">1. Freestyle 5 Mass Message Captions</label>
+                <textarea id="freestyleCaptions" name="freestyleCaptions" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <div>
+                <label for="methodsToMakeOver300" class="block text-sm font-medium text-gray-700">2. Explain to us exact methods you used in the past to make over $300+ from ONE fan</label>
+                <textarea id="methodsToMakeOver300" name="methodsToMakeOver300" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <div>
+                <label for="handlingObjections" class="block text-sm font-medium text-gray-700">3. How do you handle fans' objections to PPV?</label>
+                <textarea id="handlingObjections" name="handlingObjections" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <div>
+                <label for="meetingFans" class="block text-sm font-medium text-gray-700">4. How do you handle fans who want to meet?</label>
+                <textarea id="meetingFans" name="meetingFans" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <div>
+                <label for="ppvFirstOpen" class="block text-sm font-medium text-gray-700">5. What techniques would you use to make sure the fan opens the first PPV you send them?</label>
+                <textarea id="ppvFirstOpen" name="ppvFirstOpen" required class="mt-2 block w-full p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <div id="statusMessage" class="text-center text-sm text-blue-500 hidden">Processing...</div>
+
+            <button type="submit" class="w-full bg-pink-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200">Submit</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
+            authDomain: "foxyfans-e9761.firebaseapp.com",
+            databaseURL: "https://foxyfans-e9761-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "foxyfans-e9761",
+            storageBucket: "foxyfans-e9761.firebasestorage.app",
+            messagingSenderId: "509215295074",
+            appId: "1:509215295074:web:2bb6485985db4b99e2333b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        const form = document.getElementById('applicationForm2');
+        const statusMessage = document.getElementById('statusMessage');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            statusMessage.classList.remove('hidden');
+
+            const name = form.name.value;
+            const freestyleCaptions = form.freestyleCaptions.value;
+            const methodsToMakeOver300 = form.methodsToMakeOver300.value;
+            const handlingObjections = form.handlingObjections.value;
+            const meetingFans = form.meetingFans.value;
+            const ppvFirstOpen = form.ppvFirstOpen.value;
+
+            try {
+                const newEntryRef = push(ref(database, 'Skill Level Test'));
+                await set(newEntryRef, {
+                    name,
+                    freestyleCaptions,
+                    methodsToMakeOver300,
+                    handlingObjections,
+                    meetingFans,
+                    ppvFirstOpen,
+                    status: 'Processing'
+                });
+                alert('Skill Test Level Submitted Successfully!');
+                form.reset();
+                statusMessage.classList.add('hidden');
+            } catch (error) {
+                console.error('Error submitting application:', error);
+                alert('Failed to submit application. Please try again later.');
+                statusMessage.classList.add('hidden');
+            }
+        });
+    </script>
+
+</body>
+</html>
