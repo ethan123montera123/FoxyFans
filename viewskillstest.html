@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skills Level Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -120,39 +121,48 @@
 <body class="bg-white min-h-screen flex flex-col">
 
 <!-- Header (Navigation Bar) -->
-<header class="w-full p-4 text-white" style="background-color: #FF8DA1;">
+<header class="w-full p-4 text-white" style="background-color: #FF8DA1; font-family: 'Open Sans', sans-serif;">
     <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-semibold text-white">DASHBOARD</h2>
-        <nav class="mr-16"> <!-- Added margin-left here -->
-            <ul class="flex space-x-6">
-                <li>
-                    <a href="dashboard.html" class="hover:text-pink-600 hover:scale-110 transform transition duration-200 uppercase">
-                        SALARY
-                    </a>
-                </li>
-                <li>
-                    <a href="applicants.html" class="hover:text-pink-600 hover:scale-110 transform transition duration-200 uppercase">
-                        DASHBOARD
-                    </a>
-                </li>
-                <li>
-                    <a href="viewskillstest.html" class="hover:text-pink-600 hover:scale-110 transform transition duration-200 uppercase">
-                        SKILL TEST
-                    </a>
-                </li>
-                <li>
-                    <a href="status.html" class="hover:text-pink-600 hover:scale-110 transform transition duration-200 uppercase">
-                        STATUS
-                    </a>
-                </li>
-            </ul>
-        </nav>
+        <div class="flex items-center space-x-4">
+            <h2 class="text-2xl font-semibold text-white">DASHBOARD</h2>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li>
+                        <a href="dashboard.html" 
+                           class="hover:underline transform transition duration-200 uppercase"
+                           :class="{'underline': window.location.pathname === '/dashboard.html'}">
+                            SALARY
+                        </a>
+                    </li>
+                    <li>
+                        <a href="applicants.html" 
+                           class="hover:underline transform transition duration-200 uppercase"
+                           :class="{'underline': window.location.pathname === '/applicants.html'}">
+                            DASHBOARD
+                        </a>
+                    </li>
+                    <li>
+                        <a href="viewskillstest.html" 
+                           class="hover:underline transform transition duration-200 uppercase"
+                           :class="{'underline': window.location.pathname === '/viewskillstest.html'}">
+                            SKILL TEST
+                        </a>
+                    </li>
+                    <li>
+                        <a href="status.html" 
+                           class="hover:underline transform transition duration-200 uppercase"
+                           :class="{'underline': window.location.pathname === '/status.html'}">
+                            STATUS
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
         <button onclick="logoutUser()" class="bg-white text-black py-2 px-4 rounded-md hover:bg-pink-100">
             LOGOUT
         </button>
     </div>
 </header>
-
 
     <!-- Main content -->
     <div class="flex-1 p-8 overflow-y-auto">
