@@ -8,15 +8,11 @@
 </head>
 <body class="flex min-h-screen bg-white">
 
-    <!-- Sidebar -->
     <div class="bg-pink-600 w-full md:w-64 p-4 text-white flex flex-col justify-between">
         <div>
             <h2 class="text-2xl font-semibold mb-6">FoxyFans Dashboard</h2>
             <nav>
                 <ul>
-                    <!-- <li>
-                        <a href="dashboard.html" id="homeLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Home</a>
-                    </li> -->
                     <li>
                         <a href="applicants.html" id="applicantsLink" class="block py-2 px-4 rounded-lg hover:bg-pink-700 mb-2">Applicants</a>
                     </li>
@@ -33,13 +29,10 @@
         </div>
     </div>
 
-    <!-- Main Content Area -->
     <div class="flex-1 p-8 bg-gray-100">
-        <!-- Container for Status Table -->
         <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-4xl mt-16 mb-16 mx-auto">
             <h1 class="text-3xl font-semibold text-center text-pink-600 mb-6">Application Status</h1>
 
-            <!-- Table to display client applications -->
             <table class="min-w-full table-auto border-collapse">
                 <thead>
                     <tr class="bg-pink-600 text-white">
@@ -48,18 +41,15 @@
                     </tr>
                 </thead>
                 <tbody id="statusTable" class="text-gray-700">
-                    <!-- Dynamically populated rows will go here -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Modal for Viewing Applicant Details -->
     <div id="applicantModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
         <div class="bg-white p-8 rounded-lg shadow-2xl w-96">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Applicant Details</h2>
             <div id="applicantDetails" class="space-y-4 text-gray-700">
-                <!-- Applicant details will be populated here -->
             </div>
             <div class="flex justify-end mt-4">
                 <button onclick="closeModal()" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700">Close</button>
@@ -68,12 +58,10 @@
     </div>
 
     <script type="module">
-        // Import Firebase dependencies
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBQv0xhSZS0Sv--8ohXsrtME_HLlVTOeLg",
             authDomain: "foxyfans-e9761.firebaseapp.com",
@@ -84,12 +72,10 @@
             appId: "1:509215295074:web:2bb6485985db4b99e2333b"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
         const auth = getAuth(app);
 
-        // Add active class dynamically based on the current page
         const currentPage = window.location.pathname;
         if (currentPage.includes("dashboard.html")) {
             document.getElementById("homeLink").classList.add("bg-pink-700");
@@ -99,54 +85,43 @@
             document.getElementById("statusLink").classList.add("bg-pink-700");
         }
 
-        // Logout function
         window.logoutUser = async function() {
             try {
                 await signOut(auth);
                 alert("You have been logged out.");
-                window.location.href = "login.html"; // Redirect to login page after logout
+                window.location.href = "login.html";
             } catch (error) {
                 console.error("Error signing out: ", error);
             }
         }
 
-        // Authentication check to ensure the user is logged in
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                // If no user is logged in, redirect to login page
                 window.location.href = "login.html";
             }
         });
 
-        // Reference to the database
         const applicationsRef = ref(database, 'applications');
 
-        // Fetch applications data from Firebase and update the table
         onValue(applicationsRef, (snapshot) => {
             const statusTable = document.getElementById('statusTable');
-            statusTable.innerHTML = ''; // Clear previous data
+            statusTable.innerHTML = '';
 
-            // Check if data exists
             const data = snapshot.val();
             if (data) {
-                // Iterate through each application and add a row to the table
                 Object.keys(data).forEach((key) => {
                     const application = data[key];
 
-                    // Create table row for each application
                     const row = document.createElement('tr');
                     row.classList.add('border-t', 'border-gray-300');
 
-                    // Full name cell
                     const nameCell = document.createElement('td');
                     nameCell.classList.add('py-3', 'px-4');
                     nameCell.textContent = application.name;
 
-                    // Status cell (Dropdown)
                     const statusCell = document.createElement('td');
                     statusCell.classList.add('py-3', 'px-4');
 
-                    // Create status dropdown
                     const statusDropdown = document.createElement('select');
                     statusDropdown.classList.add('bg-gray-100', 'px-4', 'py-2', 'rounded-lg');
                     const statuses = ['Processing', 'For Interview', 'Accepted'];
@@ -161,10 +136,8 @@
                         statusDropdown.appendChild(option);
                     });
 
-                    // Handle status change
                     statusDropdown.addEventListener('change', (event) => {
                         const newStatus = event.target.value;
-                        // Update the status in the database
                         update(ref(database, 'applications/' + key), {
                             status: newStatus
                         }).then(() => {
@@ -174,18 +147,14 @@
                         });
                     });
 
-                    // Append dropdown to status cell
                     statusCell.appendChild(statusDropdown);
 
-                    // Append cells to the row
                     row.appendChild(nameCell);
                     row.appendChild(statusCell);
 
-                    // Append row to the table
                     statusTable.appendChild(row);
                 });
             } else {
-                // If no data exists, show a message
                 const row = document.createElement('tr');
                 const cell = document.createElement('td');
                 cell.colSpan = 2;
@@ -196,18 +165,15 @@
             }
         });
 
-        // Function to open modal and populate applicant data
         function openModal(applicantId) {
             const modal = document.getElementById('applicantModal');
             const detailsContainer = document.getElementById('applicantDetails');
-            detailsContainer.innerHTML = ''; // Clear previous details
+            detailsContainer.innerHTML = '';
 
-            // Fetch applicant details from Firebase
             const applicantRef = ref(database, 'applications/' + applicantId);
             onValue(applicantRef, (snapshot) => {
                 const applicant = snapshot.val();
                 if (applicant) {
-                    // Populate modal with applicant details
                     const details = `
                         <p><strong>Name:</strong> ${applicant.name}</p>
                         <p><strong>Location:</strong> ${applicant.location}</p>
@@ -220,15 +186,14 @@
                         <p><strong>Telegram Username:</strong> ${applicant.telegramUsername}</p>
                     `;
                     detailsContainer.innerHTML = details;
-                    modal.classList.remove('hidden'); // Show the modal
+                    modal.classList.remove('hidden');
                 }
             });
         }
 
-        // Function to close the modal
         function closeModal() {
             const modal = document.getElementById('applicantModal');
-            modal.classList.add('hidden'); // Hide the modal
+            modal.classList.add('hidden');
         }
     </script>
 
